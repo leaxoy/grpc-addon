@@ -14,6 +14,10 @@ func init() {
 	resolver.Register(&etcdBuilder{})
 }
 
+const (
+	keyPrefix = "/_grpc/service/"
+)
+
 type (
 	etcdBuilder  struct{}
 	etcdResolver struct {
@@ -59,7 +63,7 @@ func (r *etcdResolver) start() {
 		return
 	}
 	if !r.initialized {
-		response, err := r.client.Get(r.ctx, r.service, etcd.WithPrefix())
+		response, err := r.client.Get(r.ctx, keyPrefix+r.service, etcd.WithPrefix())
 		if err == nil {
 			for _, kv := range response.Kvs {
 				r.addrs = append(r.addrs, resolver.Address{Addr: string(kv.Value), ServerName: r.service})
@@ -72,7 +76,7 @@ func (r *etcdResolver) start() {
 		select {
 		case <-r.ctx.Done():
 			return
-		case response := <-r.client.Watch(r.ctx, r.service, etcd.WithPrefix()):
+		case response := <-r.client.Watch(r.ctx, keyPrefix+r.service, etcd.WithPrefix()):
 			for _, event := range response.Events {
 				switch event.Type {
 				case mvccpb.PUT:
