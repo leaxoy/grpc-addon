@@ -41,8 +41,8 @@ const (
 	Name                     = "_etcd_registry"
 	defaultHeartBeatInterval = 3 * 60
 	defaultTTL               = 5 * 60
-	// KeyPrefix set prefix of etcd storage, this should sync with `ectd resolver` setting
-	KeyPrefix = "/_grpc/service/"
+	// keyPrefix set prefix of etcd storage, this should sync with `ectd resolver` setting
+	keyPrefix = "/_grpc/service/"
 )
 
 // WithKeyTTL return a set ttl Option, default is 300
@@ -111,23 +111,24 @@ func NewEtcdRegistry(endpoint string, opts ...Option) registry.ServiceRegistry {
 }
 
 func (p *etcdRegistry) Register(ctx context.Context, info registry.ServiceInfo) {
+	key, value := p.kvBuilder(info)
 	lease, _ := p.client.Grant(context.Background(), p.keyTTL)
-	resp, err := p.kv.Put(ctx, "", "", clientv3.WithLease(lease.ID))
+	resp, err := p.kv.Put(ctx, keyPrefix+key, value, clientv3.WithLease(lease.ID))
 	if p.putHandler != nil {
 		p.putHandler(resp, err)
 	}
 	if err != nil {
 		log.Fatal(err)
 	}
-	go p.heartBeat(context.Background(), info)
+	go p.heartBeat(context.Background(), key, value)
 }
 
-func (p *etcdRegistry) heartBeat(ctx context.Context, info registry.ServiceInfo) {
+func (p *etcdRegistry) heartBeat(ctx context.Context, key, value string) {
 	ticker := time.Tick(time.Duration(p.heartBeatRate) * time.Second)
 	for {
 		select {
 		case <-ticker:
-			p.kv.Put(ctx, "", "")
+			p.kv.Put(ctx, keyPrefix+key, value)
 		}
 	}
 }
