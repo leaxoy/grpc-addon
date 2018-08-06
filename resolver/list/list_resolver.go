@@ -7,11 +7,11 @@ import (
 )
 
 func init() {
-	resolver.Register(&listBuilder{})
+	resolver.Register(new(listBuilder))
 }
 
 type (
-	listBuilder struct{}
+	listBuilder  struct{}
 	listResolver struct {
 		target resolver.Target
 		cc     resolver.ClientConn

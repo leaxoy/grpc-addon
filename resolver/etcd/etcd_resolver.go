@@ -11,11 +11,12 @@ import (
 )
 
 func init() {
-	resolver.Register(&etcdBuilder{})
+	resolver.Register(new(etcdBuilder))
 }
 
 const (
 	keyPrefix = "/_grpc/service/"
+	Name      = "etcd"
 )
 
 type (
@@ -52,9 +53,7 @@ func (*etcdBuilder) Build(target resolver.Target, cc resolver.ClientConn, opts r
 	return r, nil
 }
 
-func (*etcdBuilder) Scheme() string {
-	return "etcd"
-}
+func (*etcdBuilder) Scheme() string { return Name }
 
 func (r *etcdResolver) start() {
 	select {

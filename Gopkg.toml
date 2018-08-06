@@ -31,7 +31,7 @@
 
 [[constraint]]
   name = "google.golang.org/grpc"
-  version = "1.11.3"
+  version = "1.14.0"
 
 [prune]
   go-tests = true
@@ -40,3 +40,7 @@
 [[constraint]]
   name = "github.com/fsnotify/fsnotify"
   version = "1.4.7"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/samuel/go-zookeeper"

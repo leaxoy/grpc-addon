@@ -10,7 +10,7 @@ import (
 )
 
 func init() {
-	resolver.Register(&fileBuilder{})
+	resolver.Register(new(fileBuilder))
 }
 
 type (
